@@ -1,0 +1,40 @@
+================================================================================
+Exercise 05: Replace Reduce with Allreduce
+================================================================================
+
+Description:
+MPI_Reduce delivers the final answer to root only. If worker ranks also need
+the total sum (e.g. to calculate their percentage contribution to the whole),
+a subsequent MPI_Bcast would normally be required.
+
+In Exercise 5, MPI_Allreduce combines both reduction and broadcast into a
+single, highly optimized collective call:
+1. MPI_Allreduce:
+   - MPI_Allreduce(&local_sum, &total_sum, 1, MPI_LONG_LONG, MPI_SUM, MPI_COMM_WORLD);
+   - Notice: No root argument is provided; all processes receive the result.
+   - Typically implemented using butterfly / recursive-doubling algorithms.
+2. Contribution Percentage:
+   - Since every process possesses total_sum, each process computes:
+     percentage = ((double)local_sum / (double)total_sum) * 100.0;
+   - Each process prints its rank, local_sum, total_sum, and percentage.
+
+--------------------------------------------------------------------------------
+Execution Output (4 Processes):
+--------------------------------------------------------------------------------
+Command: mpirun -np 4 ./sum_allreduce
+
+Root filled array with values 1 to 1000000
+  Rank 0: summed indices [0, 250000) => local_sum = 31250125000
+  Rank 0: local_sum = 31250125000, total_sum = 500000500000, contribution = 6.25%
+  Rank 1: summed indices [250000, 500000) => local_sum = 93750125000
+  Rank 1: local_sum = 93750125000, total_sum = 500000500000, contribution = 18.75%
+  Rank 2: summed indices [500000, 750000) => local_sum = 156250125000
+  Rank 2: local_sum = 156250125000, total_sum = 500000500000, contribution = 31.25%
+  Rank 3: summed indices [750000, 1000000) => local_sum = 218750125000
+  Rank 3: local_sum = 218750125000, total_sum = 500000500000, contribution = 43.75%
+
+[Allreduce] Total sum = 500000500000
+[Allreduce] Expected  = 500000500000
+[Allreduce] Correct?  = YES
+[Allreduce] Time      = 0.003445 sec
+================================================================================

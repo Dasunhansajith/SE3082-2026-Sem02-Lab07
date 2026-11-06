@@ -1,0 +1,36 @@
+================================================================================
+Exercise 04: Replace Gather with Reduce
+================================================================================
+
+Description:
+In Exercise 3, MPI_Gather assembled partial sums on root, after which root
+manually looped through the gathered array to sum them.
+
+In Exercise 4, MPI_Reduce performs both communication and computation in one call:
+1. Memory Optimization:
+   - Root does NOT need the all_sums array anymore.
+   - Only a single variable 'total_sum' is needed on root.
+2. MPI_Reduce:
+   - MPI_Reduce(&local_sum, &total_sum, 1, MPI_LONG_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+   - Combines local values using MPI_SUM.
+   - Internally executes an efficient logarithmic tree reduction algorithm (O(log P)).
+3. Result:
+   - Upon completion, total_sum on root immediately holds the global sum.
+   - Note: The result in total_sum is only valid on root (rank 0).
+
+--------------------------------------------------------------------------------
+Execution Output (4 Processes):
+--------------------------------------------------------------------------------
+Command: mpirun -np 4 ./sum_reduce
+
+Root filled array with values 1 to 1000000
+  Rank 0: summed indices [0, 250000) => local_sum = 31250125000
+  Rank 1: summed indices [250000, 500000) => local_sum = 93750125000
+  Rank 2: summed indices [500000, 750000) => local_sum = 156250125000
+  Rank 3: summed indices [750000, 1000000) => local_sum = 218750125000
+
+[Reduce] Total sum   = 500000500000
+[Reduce] Expected    = 500000500000
+[Reduce] Correct?    = YES
+[Reduce] Time        = 0.002338 sec
+================================================================================

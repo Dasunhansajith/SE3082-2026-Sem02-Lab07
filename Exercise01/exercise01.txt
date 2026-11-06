@@ -1,0 +1,36 @@
+================================================================================
+Exercise 01: Broadcast + Send/Recv (Baseline Implementation)
+================================================================================
+
+Description:
+This program serves as the baseline for parallel summation of 1,000,000 integers.
+Root initializes an array containing numbers 1 to 1,000,000.
+
+Strategy:
+1. Memory Allocation:
+   - EVERY process allocates the full array of N = 1,000,000 integers.
+   - This leads to excessive memory consumption (4 MB per process).
+2. Communication:
+   - Root broadcasts the entire array to ALL processes using MPI_Bcast.
+   - Each process sums its own contiguous portion [rank*chunk_size, (rank+1)*chunk_size).
+   - Non-root processes send partial sums to root using MPI_Send.
+   - Root sequentially receives partial sums using MPI_Recv in an O(P) loop.
+3. Verification:
+   - Global expected sum is N * (N + 1) / 2 = 500,000,500,000.
+
+--------------------------------------------------------------------------------
+Execution Output (4 Processes):
+--------------------------------------------------------------------------------
+Command: mpirun -np 4 ./sum_bcast
+
+Root filled array with values 1 to 1000000
+  Rank 0: summed indices [0, 250000) => local_sum = 31250125000
+  Rank 1: summed indices [250000, 500000) => local_sum = 93750125000
+  Rank 2: summed indices [500000, 750000) => local_sum = 156250125000
+  Rank 3: summed indices [750000, 1000000) => local_sum = 218750125000
+
+[Bcast] Total sum   = 500000500000
+[Bcast] Expected    = 500000500000
+[Bcast] Correct?    = YES
+[Bcast] Time        = 0.007416 sec
+================================================================================

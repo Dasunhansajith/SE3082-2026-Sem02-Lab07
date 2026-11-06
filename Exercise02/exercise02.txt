@@ -1,0 +1,37 @@
+================================================================================
+Exercise 02: Replace Broadcast with Scatter
+================================================================================
+
+Description:
+In Exercise 1, every process allocated the full 1,000,000-element array and
+received the entire array via MPI_Bcast, wasting substantial memory and
+network bandwidth.
+
+In Exercise 2, MPI_Scatter is used instead:
+1. Memory Allocation:
+   - Only Root (rank 0) allocates the full array of N = 1,000,000 integers.
+   - All processes allocate only a local chunk buffer of size chunk_size = N / size.
+2. MPI_Scatter:
+   - Root divides the array and sends only chunk_size elements to each rank.
+   - sendcount is chunk_size (number of elements to EACH process, not total).
+3. Computation:
+   - Each rank sums its local_chunk buffer from index 0 to chunk_size - 1.
+4. Result Collection:
+   - Point-to-point MPI_Send / MPI_Recv is kept to send local sums to root.
+
+--------------------------------------------------------------------------------
+Execution Output (4 Processes):
+--------------------------------------------------------------------------------
+Command: mpirun -np 4 ./sum_scatter
+
+Root filled array with values 1 to 1000000
+  Rank 0: summed indices [0, 250000) => local_sum = 31250125000
+  Rank 1: summed indices [250000, 500000) => local_sum = 93750125000
+  Rank 2: summed indices [500000, 750000) => local_sum = 156250125000
+  Rank 3: summed indices [750000, 1000000) => local_sum = 218750125000
+
+[Scatter] Total sum   = 500000500000
+[Scatter] Expected    = 500000500000
+[Scatter] Correct?    = YES
+[Scatter] Time        = 0.003141 sec
+================================================================================

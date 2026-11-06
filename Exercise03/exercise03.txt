@@ -1,0 +1,36 @@
+================================================================================
+Exercise 03: Replace Send/Recv with Gather
+================================================================================
+
+Description:
+In Exercise 2, partial sums were collected on root using an O(P) sequential
+loop with MPI_Send and MPI_Recv.
+
+In Exercise 3, MPI_Gather replaces the entire point-to-point communication loop:
+1. Memory Allocation:
+   - Root allocates the full array (N ints) and an array all_sums of size 'size'
+     (long long) to receive the partial sum from each rank.
+   - All processes allocate only a local chunk buffer of size chunk_size = N / size.
+2. MPI_Gather:
+   - Each process sends its local_sum (1 long long value).
+   - Root gathers these values in rank order into all_sums[].
+3. Summation:
+   - Gather does not compute; root loops through all_sums[0..size-1] to calculate
+     the total sum.
+
+--------------------------------------------------------------------------------
+Execution Output (4 Processes):
+--------------------------------------------------------------------------------
+Command: mpirun -np 4 ./sum_gather
+
+Root filled array with values 1 to 1000000
+  Rank 0: summed indices [0, 250000) => local_sum = 31250125000
+  Rank 1: summed indices [250000, 500000) => local_sum = 93750125000
+  Rank 2: summed indices [500000, 750000) => local_sum = 156250125000
+  Rank 3: summed indices [750000, 1000000) => local_sum = 218750125000
+
+[Gather] Total sum   = 500000500000
+[Gather] Expected    = 500000500000
+[Gather] Correct?    = YES
+[Gather] Time        = 0.002766 sec
+================================================================================
