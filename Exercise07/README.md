@@ -65,3 +65,4 @@ Suppose 4 processes filter incoming data and generate varying counts of output r
   - Rank 3 gets `prefix_sum = 1000` $\rightarrow$ Write offset: $1000 - 500 = \mathbf{500}$ (writes records 500 to 999)
 
 In a single $O(\log P)$ call, every process computes its exact disjoint file position with **zero secondary communication**.
+
